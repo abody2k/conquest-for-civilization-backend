@@ -1,7 +1,10 @@
 import express from "express";
 import {createClient} from "redis";
 import { config } from "dotenv";
+import {WebSocketServer} from "ws";
+
 config();
+
 
 
 let numberOfRooms=0;
@@ -25,7 +28,7 @@ client.connect().then(()=>{
 		// const rr = await client.get("m4gnzdj0");
 		// console.log(JSON.parse(rr));
 		
-		
+		// client.configSet("notify-keyspace-events","Ex")
 
 	}else{
 		await client.set("noOfRooms",0);
@@ -40,6 +43,38 @@ let app = express();
 
 app.use(express.json());
 
+let ws= new WebSocketServer({port:4001});
+
+
+ws.on("connection",function conn(w){
+	console.log("new connection");
+
+
+
+w.on("open",function (){
+
+
+	console.log("opened connecion");
+	
+})
+w.on("message",function(d,b){
+	console.log("new msg");
+	
+	console.log([d.toString(),b]);
+	
+});
+
+w.on("close",function(n,r){
+
+	console.log("closed connection");
+	
+	console.log(n,r);
+	
+})
+
+setInterval(()=>{w.send("مرحبا")},1000)
+
+});
 
 //make a new match
 //and return the matchID, new player ID to the player, add matchID to the lobby
@@ -116,5 +151,6 @@ app.listen(4000,()=>{
 
 
 	console.log("server is on");
+	
 	
 })
