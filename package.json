@@ -15,5 +15,13 @@
   "bugs": {
     "url": "https://github.com/abody2k/conquest-for-civilization-backend/issues"
   },
-  "homepage": "https://github.com/abody2k/conquest-for-civilization-backend#readme"
+  "homepage": "https://github.com/abody2k/conquest-for-civilization-backend#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "redis": "^4.7.0"
+  }
 }

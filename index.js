@@ -1,4 +1,37 @@
 import express from "express";
+import {createClient} from "redis";
+import { config } from "dotenv";
+config();
+
+
+let numberOfRooms=0;
+
+
+let client = createClient({
+	username:"default",
+	password:process.env.PASSWORD,
+	socket:{
+		host:process.env.HOST
+		,port:process.env.PORT
+	}
+})
+client.connect().then(()=>{
+
+	client.get("noOfRooms").then(async (d)=>{
+
+	if(d){
+		numberOfRooms = Number(d);
+		console.log(`number of rooms is ${numberOfRooms}`);
+		
+
+	}else{
+		await client.set("noOfRooms",0);
+		console.log(`number of rooms is ${numberOfRooms}`);
+
+	}
+
+})
+})
 
 let app = express();
 
@@ -11,8 +44,14 @@ app.use(express.json());
 app.get("/nm",(req,res)=>{
 
 
-	//check if the game client is using the API
+
+	if (numberOfRooms>process.env["MAX-CONNECTIONS"]){
+		res.sendStatus(403);
+		return;
+	}
 	
+
+	res.sendStatus(200)
 
 
 
@@ -30,4 +69,13 @@ app.post("/jr",(req,res)=>{
 
 
 
+})
+
+
+
+app.listen(4000,()=>{
+
+
+	console.log("server is on");
+	
 })
