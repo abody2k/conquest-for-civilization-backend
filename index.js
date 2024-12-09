@@ -3,6 +3,7 @@ import {createClient} from "redis";
 import { config } from "dotenv";
 import {WebSocketServer} from "ws";
 import {randomUUID} from "crypto";
+import { makeUnit, units } from "./units.js";
 
 config();
 let players = new Map();
@@ -99,8 +100,8 @@ w.on("message",async function(d,b){
 								c:[1000,1000]
 							}),
 							{EX:(60*10)});
-							players.get(data.p[0]).send("gs 1"); //1 stands for your turn
-							w.send("gs 0");
+							players.get(data.p[0]).send("gs 1 "+data.p[0]); //1 stands for your turn
+							w.send("gs 0 "+playerID);
 							
 							
 						}else{
@@ -122,8 +123,30 @@ w.on("message",async function(d,b){
 			}
 			break;
 			
+		case "mu":  // "mu roomID unitID playerNumber" make a unit given the room and userID
 		
-		case "mu roomID unitID":
+		let data2 = await client.get(d.toString().split(" ")[1]);
+	
+
+		if(data2){
+			data2 = JSON.parse(data2);
+			console.log(data2);
+			
+			if (units[Number(d.toString().split(" ")[2])].p> data2.c[Number(d.toString().split(" ")[3])]){
+
+				return;
+			}
+
+			
+			console.log(data2);
+			data2.u =[...data2.u, makeUnit((Number(d.toString().split(" ")[3])==0?[0,0]:[20,20]),Number(d.toString().split(" ")[2]),Number(d.toString().split(" ")[3]))];
+			data2.c[Number(d.toString().split(" ")[3])] -= units[Number(d.toString().split(" ")[2])].p;
+			await client.set(d.toString().split(" ")[1],JSON.stringify(data2));
+			players.get(data2.p[0]).send(`mu ${d.toString().split(" ")[2]} ${d.toString().split(" ")[3]}`); // unit ID location
+			players.get(data2.p[1]).send(`mu ${d.toString().split(" ")[2]} ${d.toString().split(" ")[3]}`);
+
+			
+		}
 
 		break;
 		default:
