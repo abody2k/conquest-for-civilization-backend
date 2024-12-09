@@ -75,41 +75,43 @@ w.on("message",async function(d,b){
 			if (data){
 				players.set(playerID,w); // add the socket to the list of players	
 				data = JSON.parse(data);
-				console.log(data);
-				console.log(players.keys());
 
 				data.p = data.p.filter((x)=>players.has(x));
-				console.log(data);
 				
 				if (data.p.length<2){
 					// join the room
 					//update the room info
 					data.p =[...data.p,playerID];
-					await client.set(d.toString().split(" ")[1]
-						,JSON.stringify({
-							p:data.p,// generate an ID for each player
-							t:0,// current turn
-							u:[] // units
-						}),
-						{EX:(60*10)});
-						console.log("hola");
+
 						
-						console.log({
-							p:data.p,// generate an ID for each player
-							t:0,// current turn
-							u:[] // units
-						});
+		
 						
 						w.send("jr "+playerID); // give the player his ID
 						//the player should be waiting for the other player
 						//if there are 2 players now the game should get started
 						if (data.p.length==2){//somebody is already there
 							//start the game !
+							await client.set(d.toString().split(" ")[1]
+							,JSON.stringify({
+								p:data.p,// generate an ID for each player
+								t:0,// current turn
+								u:[], // units
+								c:[1000,1000]
+							}),
+							{EX:(60*10)});
 							players.get(data.p[0]).send("gs 1"); //1 stands for your turn
 							w.send("gs 0");
-							console.log("room is full now");
 							
 							
+						}else{
+							await client.set(d.toString().split(" ")[1]
+							,JSON.stringify({
+								p:data.p,// generate an ID for each player
+								t:0,// current turn
+								u:[] // units
+								
+							}),
+							{EX:(60*10)});
 						}
 
 
@@ -119,7 +121,11 @@ w.on("message",async function(d,b){
 				}
 			}
 			break;
-	
+			
+		
+		case "mu roomID unitID":
+
+		break;
 		default:
 			break;
 	}
