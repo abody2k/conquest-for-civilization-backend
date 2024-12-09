@@ -73,25 +73,37 @@ w.on("message",async function(d,b){
 			//check if the room has less than 2 players
 			let data = await client.get(d.toString().split(" ")[1]);
 			if (data){
+				players.set(playerID,w); // add the socket to the list of players	
 				data = JSON.parse(data);
+				console.log(data);
+				console.log(players.keys());
+
 				data.p = data.p.filter((x)=>players.has(x));
+				console.log(data);
 				
-				if (data.p<2){
+				if (data.p.length<2){
 					// join the room
 					//update the room info
-					
-					players.set(playerID,w); // add the socket to the list of players
+					data.p =[...data.p,playerID];
 					await client.set(d.toString().split(" ")[1]
 						,JSON.stringify({
-							p:[...data.p,playerID],// generate an ID for each player
+							p:data.p,// generate an ID for each player
 							t:0,// current turn
 							u:[] // units
 						}),
 						{EX:(60*10)});
+						console.log("hola");
+						
+						console.log({
+							p:data.p,// generate an ID for each player
+							t:0,// current turn
+							u:[] // units
+						});
+						
 						w.send("jr "+playerID); // give the player his ID
 						//the player should be waiting for the other player
 						//if there are 2 players now the game should get started
-						if (data.p==1){//somebody is already there
+						if (data.p.length==2){//somebody is already there
 							//start the game !
 							players.get(data.p[0]).send("gs 1"); //1 stands for your turn
 							w.send("gs 0");
@@ -102,6 +114,8 @@ w.on("message",async function(d,b){
 
 
 
+				}else{
+					w.close();
 				}
 			}
 			break;
@@ -117,7 +131,7 @@ w.on("message",async function(d,b){
 
 w.on("close",function(n,r){
 
-	console.log("closed connection");
+	console.log("closed connection "+ playerID);
 	players.delete(playerID);
 
 	console.log(n,r);
