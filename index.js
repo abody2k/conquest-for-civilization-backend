@@ -193,6 +193,36 @@ ws.on("connection", function conn(w) {
 			console.log([d.toString(), b]);
 
 		}
+	else if (d.toString().split(" ")[0] == "at") {// at roomID unitNumber secondunitnumber attack the second unit using the first one
+
+		let data3 = await client.get(d.toString().split(" ")[1]);
+
+		if (data3) {
+			
+			data3 = JSON.parse(data3);
+
+			data3.u[Number(d.toString().split(" ")[3])].hp-=data3.u[Number(d.toString().split(" ")[2])].pow;
+			
+			if(data3.u[Number(d.toString().split(" ")[3])].hp<=0){
+
+				data3.u = data3.u.filter((x)=>x!=data3.u[Number(d.toString().split(" ")[3])]);
+			
+			}
+
+			await client.set(d.toString().split(" ")[1], JSON.stringify(data3));
+
+			players.get(data3.p[0]).send(`at ${d.toString().split(" ")[2]} ${d.toString().split(" ")[3]}`); // unit ID location
+
+			players.get(data3.p[1]).send(`at ${d.toString().split(" ")[2]} ${d.toString().split(" ")[3]}`);
+
+		}
+
+
+		console.log("new msg");
+
+		console.log([d.toString(), b]);
+
+	}
 	});
 
 	w.on("close", function (n, r) {
